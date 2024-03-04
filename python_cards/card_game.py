@@ -18,6 +18,10 @@ def main():
     game = CardGame()
     game.create_deck()
 
+    drawn_card_data = game.draw_card()
+    print(f"Drawn card: {drawn_card_data["cards"][0]['value']} of {drawn_card_data["cards"][0]['suit']}")
+    print(f"remaining cards left in deck id {drawn_card_data["deck_id"]}: {drawn_card_data["remaining"]}")
+
     while True:
         draw_again = input("Do you want to draw another card? (yes/no): ").lower()
 
