@@ -8,7 +8,7 @@ All interaction between my code and deckofcardsapi is through API calls.
 For now I started with the pyhthon code. Once I work out the logic, I'll give a go to Java.
 At this stage my code:
  - will ask for a shuffeld deck
- - will ask for a first card
+ - will ask for 4 cards to deal first round
  - will prompt the player if they want an other card
 I need to
  - find out what the 21 rules are
