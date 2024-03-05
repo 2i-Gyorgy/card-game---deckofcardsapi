@@ -18,30 +18,60 @@ class CardGame:
         data = self.API.api_request(self.base_url, request_qery_string)
         return data
     
+    def calculate_total_value(self, hand):
+        # hand is either
+        # self.dealer_hand or
+        # self.player_hand
+        hand.total_in_hand = 0
+        for value in hand.cards_in_hand:
+            hand.total_in_hand += self.card_values[value['value']]
+        print(hand.total_in_hand)
+    
     def deal_first_round(self):
-        card_data = self.draw_card(4)
-        self.dealer_hand.total_in_hand += self.card_values[card_data["cards"][0]['value']]
-        self.dealer_hand.total_in_hand += self.card_values[card_data["cards"][2]['value']]
-        self.player_hand.total_in_hand += self.card_values[card_data["cards"][1]['value']]
-        print(f"Drawn card: {card_data["cards"][1]['value']} of {card_data["cards"][1]['suit']}")
-        self.player_hand.total_in_hand += self.card_values[card_data["cards"][3]['value']]
-        print(f"Drawn card: {card_data["cards"][3]['value']} of {card_data["cards"][3]['suit']}")
+        response = self.draw_card(4)
+        
+        for index, value in enumerate(response["cards"]):
+            if index % 2 == 0:
+                self.dealer_hand.cards_in_hand.append(value)
+            else:
+                self.player_hand.cards_in_hand.append(value)
 
-        print(f"Dealer hand: {self.dealer_hand.total_in_hand}")
-        print(f"Player hand: {self.player_hand.total_in_hand}")
+        print("Dealer hand:")
+        for value in self.dealer_hand.cards_in_hand:
+            print({value["code"]})
+        print("Player hand:")
+        for value in self.player_hand.cards_in_hand:
+            print({value["code"]})
 
-        print(f"remaining cards left in deck id {card_data["deck_id"]}: {card_data["remaining"]}")
+        self.calculate_total_value(self.dealer_hand)
+        self.calculate_total_value(self.player_hand)
+
+        print(f"remaining cards left in deck id {response["deck_id"]}: {response["remaining"]}")
 
     def deal(self):
-        card_data = self.draw_card(2)
-        self.dealer_hand.total_in_hand += self.card_values[card_data["cards"][0]['value']]
-        self.player_hand.total_in_hand += self.card_values[card_data["cards"][1]['value']]
+        if self.dealer_hand.total_in_hand < 17:
+            response = self.draw_card(2)
+        
+            for index, value in enumerate(response["cards"]):
+                if index % 2 == 0:
+                    self.dealer_hand.cards_in_hand.append(value)
+                else:
+                    self.player_hand.cards_in_hand.append(value)
+        else:
+            response = self.draw_card(1)
+            self.player_hand.cards_in_hand.append(response["cards"][0])
 
-        print(f"Dealer hand: {self.dealer_hand.total_in_hand}")
-        print(f"Player hand: {self.player_hand.total_in_hand}")
-        print(f"Drawn card: {card_data["cards"][1]['value']} of {card_data["cards"][1]['suit']}")
+        print("Dealer hand:")
+        for value in self.dealer_hand.cards_in_hand:
+            print({value["code"]})
+        print("Player hand:")
+        for value in self.player_hand.cards_in_hand:
+            print({value["code"]})
 
-        print(f"remaining cards left in deck id {card_data["deck_id"]}: {card_data["remaining"]}")
+        self.calculate_total_value(self.dealer_hand)
+        self.calculate_total_value(self.player_hand)
+
+        print(f"remaining cards left in deck id {response["deck_id"]}: {response["remaining"]}")
 
 
     class API:
@@ -51,11 +81,12 @@ class CardGame:
     class Hand:
         def __init__(self):
             self.total_in_hand = 0
+            self.cards_in_hand = [] # is a list of a dict of the card data
 
 def main():
     game = CardGame()
-    game.create_deck(1)
 
+    game.create_deck(1)
     print(game.deck_id)
 
     game.deal_first_round()
